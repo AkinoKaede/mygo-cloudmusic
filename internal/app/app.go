@@ -185,6 +185,12 @@ func (a *app) showMain() {
 
 // Run runs the app until it quits.
 func Run() error {
+	// Opening the app again shows the running one's window: Linux and
+	// Windows would start another, with a second tray icon. Asked before
+	// anything else, so the second one touches no data on its way out.
+	if !mygo.App.RequestSingleInstanceLock() {
+		return nil
+	}
 	a := &app{
 		playlists:  map[int64]*netease.Playlist{},
 		loadingPl:  map[int64]bool{},
@@ -286,5 +292,6 @@ func Run() error {
 	})
 	mygo.App.OnWindowAllClosed(func() {})
 	mygo.App.OnActivate(func(bool) { a.showMain() })
+	mygo.App.OnSecondInstance(func([]string, string) { a.showMain() })
 	return mygo.App.Run()
 }
